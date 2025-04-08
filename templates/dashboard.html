@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CropMonitor - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #4CAF50, #2196F3, #673AB7);
+            color: white;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header img {
+            width: 50px;
+            height: auto;
+        }
+        .app-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        .nav-links {
+            display: flex;
+            gap: 80px;
+        }
+        .nav-links a, .login-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .login-btn:hover {
+            color: yellow;
+        }
+        .login-btn {
+            background: #ff5722;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        .section {
+            padding: 50px;
+            text-align: left;
+        }
+        .section h3 {
+            font-size: 24px;
+        }
+        .section p {
+            color: white;
+        }
+        .register-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #ff9800;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+        .register-btn:hover {
+            background: #f57c00;
+        }
+        .footer {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .footer-column {
+            flex: 1;
+            padding: 10px;
+        }
+        .footer-column h3 {
+            margin-bottom: 10px;
+        }
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-column ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        .social-media-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .social-media-icons a {
+            color: white;
+            font-size: 24px;
+            text-decoration: none;
+        }
+        .footer-bottom {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .section {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="../static/WhatsApp Image 2025-03-28 at 18.37.28_c6ffe910.jpg" alt="Logo">
+            <div class="app-name">CropMonitor</div>
+        </div>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Services</a>
+            <a href="#">About</a>
+            <a href="#">Upcoming</a>
+            <a href="login.html">Dashboard</a>
+        </nav>
+        <a href="login.html" class="login-btn">Login</a>
+    </header>
+
+    <section class="section">
+        <h3>User Details</h3>
+        <p>Username: {{ farmer.username }}</p>
+        <p>Location: Lat {{ farmer.latitude }}, Long {{ farmer.longitude }}</p>
+        <p>Planting Date: {{ farmer.planting_date.strftime('%Y-%m-%d') }}</p>
+    </section>
+
+    <section class="section">
+        <h3>GDD Accumulation Over Time</h3>
+        <canvas id="gddChart" style="width: 100%; height: 500px;"></canvas>
+    </section>
+
+    <section class="section">
+        <h3>Soil Moisture Over Time</h3>
+        <canvas id="moistureChart" style="width: 100%; height: 400px;"></canvas>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const chartDataUrl = "{{ chart_data_url }}";
+
+        fetch(chartDataUrl)
+            .then(response => response.json())
+            .then(data => {
+                const moistureCtx = document.getElementById('moistureChart').getContext('2d');
+                const gddCtx = document.getElementById('gddChart').getContext('2d');
+
+                // GDD Chart
+                new Chart(gddCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.gdd_data.map(entry => entry.date),
+                        datasets: [{
+                            label: 'GDD',
+                            data: data.gdd_data.map(entry => entry.gdd),
+                            borderColor: 'rgba(255, 255, 255, 0.9)', // Brighter white
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)', // Brighter white with more opacity
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Date', color: 'white' },
+                                ticks: { color: 'white' } 
+                            },
+                            y: { 
+                                title: { display: true, text: 'GDD', color: 'white' },
+                                ticks: { color: 'white' } 
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: 'white' } }
+                        }
+                    }
+                });
+
+                // Soil Moisture Chart
+                new Chart(moistureCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.moisture_data.map(entry => entry.date),
+                        datasets: [{
+                            label: 'Soil Moisture (%)',
+                            data: data.moisture_data.map(entry => entry.moisture),
+                            borderColor: 'rgba(255, 255, 255, 0.9)', // Brighter white
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)', // Brighter white with more opacity
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Date', color: 'white' },
+                                ticks: { color: 'white' } 
+                            },
+                            y: { 
+                                title: { display: true, text: 'Moisture (%)', color: 'white' },
+                                ticks: { color: 'white' } 
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: 'white' } }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching chart data:', error));
+    </script>
+
+    <footer class="footer">
+        <div class="footer-column">
+            <h3>Contact</h3>
+            <ul>
+                <li><a href="#">Email Us</a></li>
+                <li><a href="#">Support</a></li>
+                <li><a href="#">Social Media</a></li>
+            </ul>
+        </div>
+        <div class="social-media-icons">
+            <a href="#" class="facebook-icon">Facebook</a>
+            <a href="#" class="twitter-icon">Twitter</a>
+            <a href="#" class="linkedin-icon">LinkedIn</a>
+            <a href="#" class="instagram-icon">Instagram</a>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 CropMonitor - All Rights Reserved</p>
+        </div>
+    </footer>
+</body>
+</html>
