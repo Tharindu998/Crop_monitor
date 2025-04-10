@@ -1,0 +1,13 @@
+# requirements.txt
+
+# Core dependencies
+Flask==3.0.2
+Flask-SQLAlchemy==3.1.1
+APScheduler==3.10.4
+python-dotenv==1.0.1
+Flask-Limiter==2.9.2
+requests==2.31.0
+
+# Optional (for development)
+# gunicorn==21.2.0  # For production deployment
+# pytest==7.4.3     # For testing
