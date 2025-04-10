@@ -27,15 +27,19 @@ A Flask-based web application designed to help paddy farmers optimize their crop
    cd paddy-monitoring-app
    
 1. Create a virtual environment
+   ```bash
    python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+   source venv/bin/activate  # or venv\Scripts\activate on Windows
 
 3. Install dependencies
+   ```bash
    pip install -r requirements.txt
    
 5. Set environment variables
+   ```bash
    TEXT_LK_API_TOKEN=your_textlk_api_key_here
 
-6.Run the app
-   python app.py
+6. Run the app
+   ```bash
+    python app.py
 
